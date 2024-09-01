@@ -11,3 +11,4 @@ pypi-install
 ghostscript
 google-cloud
 easyocr
+opencv-python
