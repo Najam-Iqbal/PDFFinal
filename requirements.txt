@@ -8,3 +8,4 @@ groq
 fpdf
 opencv-python-headless 
 tesseract-ocr
+pypi-install
