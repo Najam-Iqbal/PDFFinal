@@ -6,3 +6,4 @@ camelot-py[cv]
 Pillow
 groq
 fpdf
+opencv-python-headless 
