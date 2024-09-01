@@ -9,3 +9,5 @@ fpdf
 opencv-python-headless 
 pypi-install
 ghostscript
+google-cloud
+easyocr
