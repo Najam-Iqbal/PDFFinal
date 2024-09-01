@@ -32,14 +32,25 @@ def extract_text_from_pdf(pdf_file):
             image_bytes = base_image["image"]
             image_ext = base_image["ext"]
 
-            # **Option 1: Use cloud OCR service (replace with your implementation)**
-            # ocr_text = extract_text_from_image(image_bytes)  # Replace with actual OCR call
-            # extracted_text += ocr_text
+            # **Option 1: Use Google Cloud Vision API**
+            # Replace with your Google Cloud Vision API credentials
+            os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "your_google_cloud_credentials.json"
+            from google.cloud import vision
+            client = vision.ImageAnnotatorClient()
+            image = vision.Image(content=image_bytes)
+            response = client.text_detection(image=image)
+            ocr_text = ""
+            for text_annotation in response.text_annotations:
+                ocr_text += text_annotation.description
+            extracted_text += ocr_text
 
-            # **Option 2: Pre-process images and send for external OCR (replace with your implementation)**
-            # image = Image.open(io.BytesIO(image_bytes))
-            # ocr_text = process_image_for_ocr(image)  # Replace with pre-processing and OCR call
-            # extracted_text += ocr_text
+            # **Option 2: Use a pre-trained OCR model (e.g., EasyOCR)**
+            # Install EasyOCR: pip install easyocr
+            import easyocr
+            reader = easyocr.Reader(['en'])
+            result = reader.readtext(image_bytes)
+            ocr_text = "\n".join([text[1] for text in result])
+            extracted_text += ocr_text
 
         tables = camelot.read_pdf(pdf_path, pages=str(page_num + 1))
         for table in tables:
@@ -51,7 +62,19 @@ def extract_text_from_pdf(pdf_file):
 
     return "Summarization complete. Download the PDF below."
 
-# ... rest of your code for summarize_text and generate_pdf (unchanged)
+def summarize_text(text, model="llama-3.1-70b-versatile"):
+    chat_completion = client.chat.completions.create(
+        messages=[{"role": "user", "content": "Summarize this page in 15-20 lines under the heading of summary. You have to summarize, even if there are different, unlike topics on that page. (Kindly provide the response in proper paragraphing). However, if there is no text, then print Nothing to summarize. Additionally, after summarizing the text, enlist difficult terms up to 15, along with their single line meaning." + text}],
+        model=model,
+    )
+    return chat_completion.choices[0].message.content
+
+def generate_pdf(summary, page_number):
+    pdf = FPDF()
+    pdf.add_page()
+    pdf.set_font("Arial", size=12)
+    pdf.multi_cell(0, 7, f"Summary of Page {page_number}\n\n" + summary.encode('utf-8').decode('latin-1'))
+    pdf.output(f"output.pdf", "F")
 
 # Streamlit app setup
 st.title("PDF Summarizer")
