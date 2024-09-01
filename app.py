@@ -3,6 +3,7 @@ import fitz  # PyMuPDF
 from pdf2image import convert_from_path
 import camelot
 import io
+import cv2
 from PIL import Image
 from groq import Groq
 from fpdf import FPDF
